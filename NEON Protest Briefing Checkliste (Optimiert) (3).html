@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html lang="de" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>RICHTIG! LAUT! VEGAN! – NEON Briefing Checkliste (Optimiert)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        neon: {
+                            bg: '#0a0a0a',
+                            card: '#141414',
+                            cardHover: '#1c1c1c',
+                            border: '#262626',
+                            red: '#e60000',
+                            redBright: '#ff1a1a',
+                            redDark: '#990000',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #0a0a0a;
+            color: #f5f5f5;
+            font-family: 'Inter', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0a0a0a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #333;
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #e60000;
+        }
+        .checkbox-custom {
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .item-row:active .checkbox-custom {
+            transform: scale(0.92);
+        }
+        .strike-anim {
+            transition: color 0.2s ease, opacity 0.2s ease;
+        }
+        @keyframes pulse-red {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(230, 0, 0, 0.7); }
+            50% { box-shadow: 0 0 0 8px rgba(230, 0, 0, 0); }
+        }
+        .timer-warning {
+            animation: pulse-red 1.5s infinite;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col selection:bg-neon-red selection:text-white pb-16">
+
+    <!-- STICKY TOP BAR: Progress & Timer -->
+    <header class="sticky top-0 z-40 bg-neon-bg/95 backdrop-blur-md border-b border-neon-border shadow-xl">
+        <!-- Progress Bar Line -->
+        <div class="w-full h-1.5 bg-neutral-900 overflow-hidden">
+            <div id="progress-bar" class="h-full bg-gradient-to-r from-neon-red to-neon-redBright transition-all duration-300 ease-out" style="width: 0%"></div>
+        </div>
+
+        <div class="max-w-4xl mx-auto px-3 py-2.5 sm:px-6 flex flex-wrap items-center justify-between gap-2">
+            <!-- Left: Brand & Progress -->
+            <div class="flex items-center gap-3">
+                <div class="bg-neon-red text-white font-black text-xs sm:text-sm px-2.5 py-1 rounded tracking-wider uppercase shadow-sm shadow-neon-red/50">
+                    NEON
+                </div>
+                <div>
+                    <div class="flex items-baseline gap-2">
+                        <span id="progress-percent" class="text-lg sm:text-xl font-black text-white">0%</span>
+                        <span id="progress-count" class="text-xs text-neutral-300 font-semibold">(0 / 0 Punkte abgehakt)</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right: 20-Min Briefing Timer & Fullscreen -->
+            <div class="flex items-center gap-2">
+                <!-- Timer Box -->
+                <div id="timer-box" class="flex items-center bg-neon-card border border-neon-border rounded-lg px-2.5 py-1 gap-2">
+                    <div class="flex items-center gap-1.5">
+                        <svg class="w-4 h-4 text-neon-redBright" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <span id="timer-display" class="font-mono font-bold text-sm sm:text-base text-white tracking-wider">20:00</span>
+                    </div>
+                    <div class="flex items-center gap-1 border-l border-neutral-800 pl-2">
+                        <button id="timer-toggle" onclick="toggleTimer()" class="p-1 rounded hover:bg-neutral-800 text-neutral-300 hover:text-white transition" title="Start/Pause">
+                            <svg id="timer-play-icon" class="w-4 h-4 text-neon-redBright" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"></path>
+                            </svg>
+                            <svg id="timer-pause-icon" class="w-4 h-4 text-amber-400 hidden" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zM7 8a1 1 0 012 0v4a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v4a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                            </svg>
+                        </button>
+                        <button onclick="resetTimer()" class="p-1 rounded hover:bg-neutral-800 text-neutral-400 hover:text-white transition" title="Timer zurücksetzen">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Fullscreen Toggle Button -->
+                <button id="fullscreen-btn" onclick="toggleFullScreen()" class="flex items-center gap-1.5 bg-neon-red hover:bg-neon-redBright text-white px-3 py-1.5 rounded-lg text-xs font-extrabold transition active:scale-95 shadow-md shadow-neon-red/30" title="Vollbildmodus umschalten">
+                    <svg id="fs-enter-icon" class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"></path>
+                    </svg>
+                    <svg id="fs-exit-icon" class="w-4 h-4 text-white hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 9V4.5M9 9H4.5M9 9L3.75 3.75M9 15v4.5M9 15H4.5M9 15l-5.25 5.25M15 9h4.5M15 9V4.5M15 9l5.25-5.25M15 15h4.5M15 15v4.5m0-4.5l5.25 5.25"></path>
+                    </svg>
+                    <span id="fs-text">Vollbildmodus</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN CONTENT CONTAINER -->
+    <main class="max-w-4xl w-full mx-auto px-3 sm:px-6 pt-5 flex-1">
+
+        <!-- Hero Title Block -->
+        <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-neutral-900 via-neon-card to-black border border-neon-border p-5 sm:p-7 mb-5 shadow-2xl">
+            <div class="absolute -right-10 -top-10 w-40 h-40 bg-neon-red/10 rounded-full blur-2xl pointer-events-none"></div>
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-neutral-800 pb-4 mb-4">
+                <div>
+                    <div class="inline-flex items-center gap-2 text-neon-redBright font-extrabold tracking-widest text-xs uppercase mb-1">
+                        <span class="w-2 h-2 rounded-full bg-neon-redBright animate-ping"></span>
+                        RICHTIG! LAUT! VEGAN!
+                    </div>
+                    <h1 class="text-2xl sm:text-3xl font-black text-white tracking-tight">
+                        NEON Protest Briefing/Debriefing
+                    </h1>
+                </div>
+                <span class="self-start sm:self-end text-xs font-mono bg-neon-red/20 border border-neon-red/50 text-neon-redBright font-bold px-2.5 py-1 rounded">
+                    Optimierte Version
+                </span>
+            </div>
+
+            <!-- Leitfaden Hinweis-Box -->
+            <div class="bg-neon-red/10 border-l-4 border-neon-red p-3.5 rounded-r-xl text-sm text-neutral-200 leading-relaxed flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <p class="font-semibold text-white">
+                    Dies ist dein Briefing-Leitfaden, an dem du dich orientieren kannst. Das Briefing sollte nicht mehr als <span class="text-neon-redBright underline decoration-neon-red/60 font-bold">15-20 Minuten</span> dauern.
+                </p>
+                <span class="inline-flex items-center gap-1.5 text-xs font-extrabold uppercase tracking-wider bg-black/70 border border-neon-red/50 text-neon-redBright px-3 py-1.5 rounded-lg shrink-0">
+                    ✓ Antippen zum Abhaken
+                </span>
+            </div>
+        </div>
+
+        <!-- Control Bar: Filter, Expand/Collapse, Reset -->
+        <div class="flex flex-wrap items-center justify-between gap-2 mb-5 bg-neon-card border border-neon-border p-2.5 rounded-xl">
+            <!-- Filter Tabs -->
+            <div class="flex items-center bg-neutral-900 p-1 rounded-lg border border-neutral-800">
+                <button id="filter-all" onclick="setFilter('all')" class="px-3 py-1.5 rounded-md text-xs font-bold transition bg-neon-red text-white shadow">
+                    Alle anzeigen
+                </button>
+                <button id="filter-open" onclick="setFilter('open')" class="px-3 py-1.5 rounded-md text-xs font-bold transition text-neutral-400 hover:text-white">
+                    Nur offene
+                </button>
+                <button id="filter-done" onclick="setFilter('done')" class="px-3 py-1.5 rounded-md text-xs font-bold transition text-neutral-400 hover:text-white">
+                    Abgehakt
+                </button>
+            </div>
+
+            <!-- Section Controls & Reset -->
+            <div class="flex items-center gap-1.5 flex-wrap">
+                <button onclick="toggleAllSections(true)" class="px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-neutral-900 hover:bg-neutral-800 text-neutral-300 border border-neutral-800 transition">
+                    Alle aufklappen
+                </button>
+                <button onclick="toggleAllSections(false)" class="px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-neutral-900 hover:bg-neutral-800 text-neutral-300 border border-neutral-800 transition">
+                    Alle zuklappen
+                </button>
+                <button onclick="openResetModal()" class="px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-neutral-900 hover:bg-neon-red/20 text-neon-redBright border border-neon-red/30 transition flex items-center gap-1">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                    </svg>
+                    Alle zurücksetzen
+                </button>
+            </div>
+        </div>
+
+        <!-- CHECKLIST SECTIONS CONTAINER -->
+        <div id="checklist-container" class="space-y-4">
+            <!-- Dynamically populated by JavaScript -->
+        </div>
+
+        <!-- FOOTER BANNER -->
+        <div class="mt-10 rounded-2xl bg-gradient-to-r from-neon-redDark via-neon-red to-neon-redDark p-6 text-center shadow-lg border border-neon-redBright/30">
+            <p class="text-white font-black text-lg sm:text-2xl tracking-wide uppercase drop-shadow">
+                Zusammen sind wir <span class="underline decoration-white/80">RICHTIG! LAUT! VEGAN!</span> für die Tierheit.
+            </p>
+        </div>
+
+    </main>
+
+    <!-- CUSTOM CONFIRMATION MODAL (No alert/confirm used) -->
+    <div id="reset-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+        <div class="bg-neon-card border border-neon-border rounded-2xl max-w-md w-full p-6 shadow-2xl transform transition-all">
+            <div class="flex items-center gap-3 mb-3">
+                <div class="w-10 h-10 rounded-full bg-neon-red/20 border border-neon-red flex items-center justify-center text-neon-redBright shrink-0">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                    </svg>
+                </div>
+                <h3 class="text-lg font-extrabold text-white">Checkliste verwalten</h3>
+            </div>
+            <p class="text-sm text-neutral-300 mb-6 leading-relaxed">
+                Möchtest du alle abgehakten Punkte auf <strong>Anfang zurücksetzen</strong> (für den nächsten Protest) oder <strong>alle Punkte als erledigt markieren</strong>?
+            </p>
+            <div class="flex flex-col sm:flex-row gap-2.5 justify-end">
+                <button onclick="closeResetModal()" class="px-4 py-2.5 rounded-xl text-xs font-bold bg-neutral-800 hover:bg-neutral-700 text-neutral-200 transition">
+                    Abbrechen
+                </button>
+                <button onclick="checkAllItems()" class="px-4 py-2.5 rounded-xl text-xs font-bold bg-neutral-900 hover:bg-neutral-800 text-white border border-neutral-700 transition">
+                    Alle abhaken
+                </button>
+                <button onclick="resetAllItems()" class="px-4 py-2.5 rounded-xl text-xs font-bold bg-neon-red hover:bg-neon-redBright text-white shadow-lg shadow-neon-red/30 transition">
+                    Alles zurücksetzen
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Complete Data Structure verbatim from "NEON Briefing/Debriefing Komplett Optimiert"
+        const checklistData = [
+            {
+                id: 'sec-1',
+                number: '1',
+                title: '1. Vorstellung NEON Protest',
+                groups: [
+                    {
+                        title: null,
+                        items: [
+                            { id: '1-1', text: 'NEON ist eine abolitionistische Tierrechtsorganisation unter dem Dach von RLV!' },
+                            { id: '1-2', text: 'NEON bedeutet <em>No Exploitation of Non-Humans</em>' },
+                            { id: '1-3', text: 'wir kämpfen für die vollständige Abschaffung jeder Form von Tierausbeutung' },
+                            { id: '1-4', text: 'wir zeigen Tiere verschiedener Spezies: es geht um alle Tiere, die keine Menschen sind (!)' },
+                            { id: '1-5', text: 'wir verstärken vegane Botschaften in mehreren Sprachen über Lautsprecher (Ihr könnt auch selber eine Rede halten, wenn ihr wollt.)' },
+                            { id: '1-6', text: 'wir klären über das ethische Prinzip des Veganismus auf (Definition erläutern)' },
+                            { id: '1-7', text: 'wir fordern Menschen auf, vegan und aktiv zu werden und sich uns anzuschließen' }
+                        ]
+                    }
+                ]
+            },
+            {
+                id: 'sec-1-1',
+                number: '1.1',
+                title: '1.1 Welche Rollen gibt es bei NEON?',
+                groups: [
+                    {
+                        title: '(Co-) Organizer',
+                        items: [
+                            { id: '1.1-1', text: 'ist verantwortlich für die Organisation, den Ablauf, die Sicherheit, die Stimmung' },
+                            { id: '1.1-2', text: 'fragt beim Protest ab und an, ob sich alle Teilnehmer wohl fühlen' }
+                        ]
+                    },
+                    {
+                        title: 'Schildhalter',
+                        items: [
+                            { id: '1.1-3', text: 'halten große Schilder' },
+                            { id: '1.1-4', text: 'beachten Höhe (Torso oder über dem Kopf) und Ausrichtung (schwarze Seite/Fotoseite)' },
+                            { id: '1.1-5', text: 'das “Leb vegan!/Wir brauchen dich!” Schild ist <em>immer</em> in der Mitte' },
+                            { id: '1.1-6', text: 'das “<del class="text-neon-redBright">Ausbeuten</del>/Respektieren” Schild wird <em>nicht</em> in der Reihe verwendet, sondern am Tisch aufgestellt oder als A2 im Outreach benutzt' },
+                            { id: '1.1-7', text: 'wechseln bei viel Publikum in den Outreach' }
+                        ]
+                    },
+                    {
+                        title: 'Outreacher/Redner',
+                        items: [
+                            { id: '1.1-8', text: 'Outreacher benutzen den Outreach Guide als Gesprächsgrundlage' },
+                            { id: '1.1-9', text: 'Outreacher benutzen <em>immer</em> <em>kleine</em> Schilder im Outreach und binden diese mit ins Gespräch ein (sichtbar halten, sieht besser aus)' },
+                            { id: '1.1-10', text: 'Outreacher geben immer Infomaterial aus' },
+                            { id: '1.1-11', text: 'Redner können NEON Reden vorlesen oder eigene abolitionistische tierzentrierte Reden halten' }
+                        ]
+                    },
+                    {
+                        title: 'Social Media (Filmografen)',
+                        items: [
+                            { id: '1.1-12', text: 'machen Fotos und kurze Videos (Schilder, Team, Publikum, Details filmen)' },
+                            { id: '1.1-13', text: 'nehmen gezielt Gespräche auf' },
+                            { id: '1.1-14', text: 'ggf. Livestream' }
+                        ]
+                    },
+                    {
+                        title: 'Schnittaffe (Videocutter)',
+                        items: [
+                            { id: '1.1-15', text: 'verarbeiten das durch die Proteste entstehende Material zu Social Media Content' }
+                        ]
+                    }
+                ]
+            },
+            {
+                id: 'sec-2',
+                number: '2',
+                title: '2. Welche Punkte wollen wir vermitteln?',
+                infoBox: 'Bei jedem Briefing werden die für unseren Aktivismus relevanten Punkte gemeinsam im Team gebrainstormed. Ziel ist, dass jeder Teilnehmer langfristig sachkundig auftreten kann.',
+                calloutBox: 'Ermutige die Teilnehmer dazu, in den Outreach zu gehen, um sprechen zu lernen. Wir müssen alle in der Lage sein, den Veganismus und unser Anliegen sauber zu kommunizieren.',
+                groups: [
+                    {
+                        title: 'Leitpunkte:',
+                        items: [
+                            { id: '2-1', text: 'Veganismus ist ein <em>Prinzip</em>, nachdem Menschen leben <em>sollten</em>, ohne andere Tiere auszubeuten' },
+                            { id: '2-2', text: 'die Konsequenz des Prinzips ist, dass wir jegliche Tierausbeutung – unabhängig der <em>Praktik</em> – ablehnen' },
+                            { id: '2-3', text: 'es gibt nur 2 Seiten: die der Opfer oder die der Täter' },
+                            { id: '2-4', text: 'Unterschiede zwischen uns und anderen Tieren sind nicht ethisch relevant, unsere Gemeinsamkeiten hingegen schon: Lebensinteresse, subjektive Lebenserfahrung, fühlen und denken können, wir haben eigene Interessen' },
+                            { id: '2-5', text: 'wenn man nicht vegan lebt, handelt man <em>gegen</em> die Interessen der andern Tiere und man benutzt sie dann nur als <em>Mittel zum Zweck</em>' },
+                            { id: '2-6', text: 'es geht nicht um unsere Position, sondern um die <em>Werte</em> der Nicht-Veganer (Wie <em>sollte</em> es sein?)' },
+                            { id: '2-7', text: 'wichtigste Wertefrage: “Wieviele Tiere sollen ab jetzt noch für dich und wegen dir ausgebeutet werden, <em>was wünschst du dir?</em>”' }
+                        ]
+                    },
+                    {
+                        title: 'Was wir nicht vermitteln wollen:',
+                        items: [
+                            { id: '2-8', text: 'Themen wie Umwelt, Gesundheit oder Nachhaltigkeit – unser Fokus liegt ausschließlich auf den anderen Tieren und ihren Interessen' },
+                            { id: '2-9', text: 'es geht nicht um Leid- oder Tötungsvermeidung, sondern klar um die Ablehnung der <em>Ausbeutung</em> selbst' },
+                            { id: '2-10', text: 'es geht nicht um Massentierhaltung, Geld, Industrien oder „eine schlechte Behandlung“, sondern darum, dass wir Tiere grundsätzlich als bloßes <em>Mittel zum Zweck</em> benutzen. (Beispiel: Auch der Angler, der einen einzelnen Fisch tötet, begeht ein Unrecht.)' },
+                            { id: '2-11', text: 'Keine Babysteps: Wer nicht vegan lebt, beutet weiterhin andere Tiere aus' },
+                            { id: '2-12', badge: 'CALLOUT', text: '<strong>Ermutige die Teilnehmer dazu, in den Outreach zu gehen, um sprechen zu lernen.</strong> Wir müssen alle in der Lage sein, den Veganismus und unser Anliegen sauber zu kommunizieren.' }
+                        ]
+                    }
+                ]
+            },
+            {
+                id: 'sec-3',
+                number: '3',
+                title: '3. Ablauf, Formation',
+                groups: [
+                    {
+                        title: 'Ablauf:',
+                        items: [
+                            { id: '3-1', text: '<strong>INTRO:</strong> die Mehrheit der Teilnehmenden stellt sich zu Beginn in die Schilderreihe, ein paar gehen als Outreacher während des Intros zum Publikum' },
+                            { id: '3-2', text: 'Protest startet, nach 5min werden einige Schildhalter in den Outreach entlassen' },
+                            { id: '3-3', text: 'Outreacher und Schildhalter wechseln sich dynamisch ab, je nach Menge des Publikums (mehr Schilder =&gt; mehr Aufmerksamkeit =&gt; mehr Schilderhalter gehen wieder in den Outreach)' },
+                            { id: '3-4', text: 'wer Pausen machen will, kann dies jederzeit tun, jedoch bitte am Rand des Events, um das Gesamtbild nicht zu stören' },
+                            { id: '3-5', text: '<strong>OUTRO:</strong> die Mehrheit der Teilnehmenden stellt sich am Ende in die Schilderreihe, ein paar gehen als Outreacher während des Outros zum Publikum' },
+                            { id: '3-6', text: 'nachdem das Outro gelaufen ist, bleiben alle für die Gruppenaufnahmen' },
+                            { id: '3-7', text: 'Debriefing, <em>danach</em> Material einsammeln' }
+                        ]
+                    },
+                    {
+                        title: 'Formation:',
+                        items: [
+                            { id: '3-8', text: 'Reihe: 3-11 Menschen' },
+                            { id: '3-9', text: 'Kreis: bis 20 Menschen' },
+                            { id: '3-10', text: 'mehrere Linien, Halbkreise: ab 20 Menschen' },
+                            { id: '3-11', text: 'Parade: ab 50 Menschen' },
+                            { id: '3-12', badge: 'CALLOUT', text: '<strong>Hinweis beachten:</strong> Bitte bedenke, dass die Schilder vor allem dazu dienen, Aufmerksamkeit zu erzeugen. Sobald Menschen stehen bleiben, sollten möglichst viele Outreacher aktiv sein, damit wir sofort mit dem Publikum ins Gespräch kommen.' }
+                        ]
+                    }
+                ]
+            },
+            {
+                id: 'sec-4',
+                number: '4',
+                title: 'Verhalten, Sicherheit',
+                groups: [
+                    {
+                        title: 'Verhalten:',
+                        items: [
+                            { id: '4-1', text: 'wir sind die Anwälte der Tiere und verhalten uns auch so: professionell, sachkundig, im Sinne unserer Mandanten' },
+                            { id: '4-2', text: 'Umgang mit aggressiven Nicht-Veganern: deeskalierend, keine Gegenaggression, um Gewalt zu vermeiden' },
+                            { id: '4-3', text: 'dies ist kein Socializing Event, wir wollen etwas für die Tiere erreichen, jede Minute zählt und sollte sinnvoll genutzt werden' },
+                            { id: '4-4', text: 'Handzeichen erklären für alle (Schilder, Stopp, Outreachwechsel)' }
+                        ]
+                    },
+                    {
+                        title: 'Sicherheit:',
+                        items: [
+                            { id: '4-5', badge: 'GELB', text: '<strong>“GELB” / Handmeldung flache Hand = Warnung. Organizer hinschauen, bereit sein!</strong>' },
+                            { id: '4-6', badge: 'ROT', text: '<strong>“ROT” / Handzeichen “T” = Handlungen stoppen. Organizer übernimmt!</strong>' },
+                            { id: '4-7', text: 'Anweisungen des Organizers folgen, Diskussionen danach' },
+                            { id: '4-8', text: 'keine Heldentaten, deeskalierend verhalten' }
+                        ]
+                    }
+                ]
+            },
+            {
+                id: 'sec-5',
+                number: '5',
+                title: 'Gruppenaufnahme und Debriefing',
+                groups: [
+                    {
+                        title: 'Gruppenaufnahme:',
+                        items: [
+                            { id: '5-1', text: 'alle Teilnehmer stehen in 2 (oder mehr) Reihen, ohne Masken (außer Kinder)' },
+                            { id: '5-2', text: 'Motive der Schilder sollten gut sichtbar sein' },
+                            { id: '5-3', text: 'das “Leb vegan!/Wir brauchen dich!” Schild ist <em>immer</em> in der Mitte' },
+                            { id: '5-4', text: '“DER Tierrechtspodcast/Folge uns” Schild kommt nicht mit rauf' },
+                            { id: '5-5', text: 'sauber ausgerichtet: symmetrisch, Schilder in einer Reihe immer auf einer Höhe, in die selbe Richtung zeigend (schwarze Seite/Fotoseite)' },
+                            { id: '5-6', text: 'kleine Schilder außen/vorn, nicht dazwischen' },
+                            { id: '5-7', text: 'Video: von links nach rechts, von rechts nach links, jeweils andere Seite der Schilder zu sehen' },
+                            { id: '5-8', text: 'Foto: 2 Fotos, jeweils andere Seite der Schilder zu sehen, kein Weitwinkel, nah dran' }
+                        ]
+                    },
+                    {
+                        title: 'Debriefing:',
+                        items: [
+                            { id: '5-9', text: 'DANKE an alle Teilnehmenden sagen' },
+                            { id: '5-10', text: 'neue Leute persönlich verabschieden und ermutigen wiederzukommen' },
+                            { id: '5-11', text: 'kurze Feedback-Runde: Was lief gut? Was können wir verbessern?' },
+                            { id: '5-12', text: 'besondere Situationen oder Probleme an RLV! weitergeben' },
+                            { id: '5-13', text: 'nächstes Event ankündigen' },
+                            { id: '5-14', text: 'Teilnehmende bitten, das nächste mal 1 Freund mitzubringen' },
+                            { id: '5-15', text: 'ggf. Flyer zum Verteilen ausgeben (zum Auslegen in Restaurants, etc.)' }
+                        ]
+                    }
+                ]
+            }
+        ];
+
+        // State Management
+        const STORAGE_KEY = 'neon_briefing_optimiert_v1';
+        let checkedState = {};
+        let openSections = {};
+        let currentFilter = 'all'; // 'all', 'open', or 'done'
+
+        // Initialize state from localStorage
+        function loadState() {
+            try {
+                const saved = localStorage.getItem(STORAGE_KEY);
+                if (saved) {
+                    checkedState = JSON.parse(saved);
+                }
+            } catch (e) {
+                checkedState = {};
+            }
+            // Open all sections by default
+            checklistData.forEach(sec => {
+                openSections[sec.id] = true;
+            });
+        }
+
+        function saveState() {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(checkedState));
+            } catch (e) {
+                // Ignore storage errors in restricted environments
+            }
+        }
+
+        // Render the entire checklist UI
+        function renderChecklist() {
+            const container = document.getElementById('checklist-container');
+            container.innerHTML = '';
+
+            let totalItems = 0;
+            let totalChecked = 0;
+
+            checklistData.forEach(section => {
+                // Count section progress
+                let secTotal = 0;
+                let secChecked = 0;
+                section.groups.forEach(g => {
+                    g.items.forEach(item => {
+                        secTotal++;
+                        totalItems++;
+                        if (checkedState[item.id]) {
+                            secChecked++;
+                            totalChecked++;
+                        }
+                    });
+                });
+
+                const isSectionComplete = secTotal > 0 && secTotal === secChecked;
+                const isOpen = openSections[section.id];
+
+                const sectionEl = document.createElement('section');
+                sectionEl.className = `rounded-2xl bg-neon-card border transition-colors ${isSectionComplete ? 'border-neon-red shadow-neon-red/10' : 'border-neon-border'} overflow-hidden shadow-lg`;
+
+                // Section Header with "Alle in dieser Sektion abhaken" action
+                const headerHtml = `
+                    <div class="w-full flex flex-wrap items-center justify-between gap-2 p-4 sm:p-5 bg-neutral-950/50 hover:bg-neon-cardHover transition select-none">
+                        <div onclick="toggleSection('${section.id}')" class="flex items-center gap-3 sm:gap-4 pr-2 cursor-pointer flex-1 min-w-[220px]">
+                            <span class="flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-xl font-black text-xs sm:text-sm shrink-0 transition-colors ${isSectionComplete ? 'bg-neon-red text-white shadow-md shadow-neon-red/40' : 'bg-neutral-900 text-neon-redBright border border-neon-red/40'}">
+                                ${isSectionComplete ? '✓' : section.number}
+                            </span>
+                            <div>
+                                <h2 class="text-base sm:text-lg font-extrabold text-white leading-snug">${section.title}</h2>
+                                <div class="flex items-center gap-2.5 mt-1">
+                                    <div class="w-24 sm:w-32 h-2 bg-neutral-900 rounded-full overflow-hidden border border-neutral-800">
+                                        <div class="h-full bg-neon-red transition-all duration-300" style="width: ${Math.round((secChecked/secTotal)*100)}%"></div>
+                                    </div>
+                                    <span class="text-xs font-mono ${isSectionComplete ? 'text-neon-redBright font-bold' : 'text-neutral-300'}">${secChecked} / ${secTotal} abgehakt</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2 shrink-0 ml-auto">
+                            <button onclick="toggleSectionItems('${section.id}', ${!isSectionComplete})" class="px-2.5 py-1.5 rounded-lg text-xs font-bold border transition flex items-center gap-1.5 ${isSectionComplete ? 'bg-neutral-900 text-neutral-300 border-neutral-700 hover:text-white' : 'bg-neon-red/15 hover:bg-neon-red text-neon-redBright hover:text-white border-neon-red/50'}">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path>
+                                </svg>
+                                <span>${isSectionComplete ? 'Sektion öffnen' : 'Sektion abhaken'}</span>
+                            </button>
+                            <button onclick="toggleSection('${section.id}')" class="p-1.5 rounded-lg bg-neutral-900 border border-neutral-800 hover:border-neon-red/50 text-neutral-300">
+                                <svg class="w-5 h-5 transform transition-transform duration-200 ${isOpen ? 'rotate-180 text-neon-redBright' : ''}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                `;
+
+                // Section Body
+                let bodyHtml = '';
+                if (isOpen) {
+                    let groupsHtml = '';
+
+                    if (section.infoBox) {
+                        groupsHtml += `
+                            <div class="mx-4 sm:mx-5 mb-4 p-3.5 rounded-xl bg-neutral-900/90 border-l-4 border-neon-red text-xs sm:text-sm text-neutral-200 leading-relaxed flex gap-3 items-start">
+                                <svg class="w-5 h-5 text-neon-redBright shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                <span>${section.infoBox}</span>
+                            </div>
+                        `;
+                    }
+
+                    section.groups.forEach(group => {
+                        const visibleItems = group.items.filter(item => {
+                            if (currentFilter === 'open') return !checkedState[item.id];
+                            if (currentFilter === 'done') return !!checkedState[item.id];
+                            return true;
+                        });
+
+                        if (visibleItems.length === 0) return;
+
+                        let itemsListHtml = '';
+                        visibleItems.forEach(item => {
+                            const isChecked = !!checkedState[item.id];
+                            
+                            // Optional warning/stop/callout badges
+                            let badgeHtml = '';
+                            if (item.badge === 'GELB') {
+                                badgeHtml = `<span class="inline-block px-2 py-0.5 text-[10px] font-black uppercase rounded bg-neon-red/20 text-white border border-neon-redBright mr-2 align-middle">GELB / WARNUNG</span>`;
+                            } else if (item.badge === 'ROT') {
+                                badgeHtml = `<span class="inline-block px-2 py-0.5 text-[10px] font-black uppercase rounded bg-neon-red text-white border border-white/40 mr-2 align-middle">ROT / STOPP</span>`;
+                            } else if (item.badge === 'CALLOUT') {
+                                badgeHtml = `<span class="inline-block px-2 py-0.5 text-[10px] font-black uppercase rounded bg-neon-red/25 text-neon-redBright border border-neon-red/50 mr-2 align-middle">WICHTIG</span>`;
+                            }
+
+                            itemsListHtml += `
+                                <label onclick="toggleItem('${item.id}'); return false;" class="item-row group flex items-start gap-3.5 p-3.5 sm:px-4 rounded-xl cursor-pointer select-none transition-all border ${isChecked ? 'bg-neutral-950/90 border-neon-red/40' : 'bg-[#1a1a1a] hover:bg-[#222222] border-neutral-700 hover:border-neon-redBright'}">
+                                    <input type="checkbox" ${isChecked ? 'checked' : ''} class="sr-only" aria-label="Punkt abhaken">
+                                    <div class="checkbox-custom mt-0.5 w-7 h-7 rounded-lg flex items-center justify-center shrink-0 border-2 ${isChecked ? 'bg-neon-red border-neon-redBright text-white shadow-md shadow-neon-red/50' : 'border-neon-red/70 group-hover:border-neon-redBright bg-black'}">
+                                        ${isChecked ? `
+                                            <svg class="w-5 h-5 stroke-[3.5] text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path>
+                                            </svg>
+                                        ` : `
+                                            <span class="w-2 h-2 rounded-sm bg-neutral-800 group-hover:bg-neon-red/50 transition"></span>
+                                        `}
+                                    </div>
+                                    <div class="flex-1 text-sm sm:text-base leading-relaxed strike-anim ${isChecked ? 'line-through text-neutral-500' : 'text-white font-medium'}">
+                                        ${badgeHtml}${item.text}
+                                    </div>
+                                    <span class="text-[11px] font-extrabold uppercase tracking-wider px-2 py-1 rounded self-center shrink-0 transition ${isChecked ? 'bg-neon-red/20 text-neon-redBright border border-neon-red/40' : 'bg-neutral-900 text-neutral-400 group-hover:text-white border border-neutral-800'}">
+                                        ${isChecked ? '✓ Erledigt' : 'Abhaken'}
+                                    </span>
+                                </label>
+                            `;
+                        });
+
+                        groupsHtml += `
+                            <div class="px-4 sm:px-5 pb-4">
+                                ${group.title ? `
+                                    <h3 class="text-xs font-extrabold uppercase tracking-wider text-neon-redBright mb-2.5 mt-2 flex items-center gap-2">
+                                        <span class="w-2 h-2 rounded-full bg-neon-red"></span>
+                                        ${group.title}
+                                    </h3>
+                                ` : ''}
+                                <div class="space-y-2.5">
+                                    ${itemsListHtml}
+                                </div>
+                            </div>
+                        `;
+                    });
+
+                    if (groupsHtml === '') {
+                        const emptyText = currentFilter === 'done'
+                            ? 'Noch keine abgehakten Punkte in dieser Sektion.'
+                            : 'Alle Punkte in dieser Sektion sind bereits abgehakt!';
+                        groupsHtml = `
+                            <div class="px-5 pb-5 text-xs text-neutral-400 italic">
+                                ${emptyText}
+                            </div>
+                        `;
+                    }
+
+                    bodyHtml = `<div class="border-t border-neutral-800/80 pt-3">${groupsHtml}</div>`;
+                }
+
+                sectionEl.innerHTML = headerHtml + bodyHtml;
+                container.appendChild(sectionEl);
+            });
+
+            // Update Top Progress Bar
+            const percent = totalItems > 0 ? Math.round((totalChecked / totalItems) * 100) : 0;
+            document.getElementById('progress-bar').style.width = `${percent}%`;
+            document.getElementById('progress-percent').textContent = `${percent}%`;
+            document.getElementById('progress-count').textContent = `(${totalChecked} / ${totalItems} Punkte abgehakt)`;
+        }
+
+        // Toggle single item
+        function toggleItem(itemId) {
+            checkedState[itemId] = !checkedState[itemId];
+            saveState();
+            renderChecklist();
+        }
+
+        // Check or uncheck all items within a single section
+        function toggleSectionItems(secId, checkStatus) {
+            const section = checklistData.find(s => s.id === secId);
+            if (!section) return;
+            section.groups.forEach(g => {
+                g.items.forEach(item => {
+                    checkedState[item.id] = checkStatus;
+                });
+            });
+            saveState();
+            renderChecklist();
+        }
+
+        // Toggle single section accordion
+        function toggleSection(secId) {
+            openSections[secId] = !openSections[secId];
+            renderChecklist();
+        }
+
+        // Expand or collapse all sections
+        function toggleAllSections(expand) {
+            checklistData.forEach(sec => {
+                openSections[sec.id] = expand;
+            });
+            renderChecklist();
+        }
+
+        // Filter ('all', 'open', 'done')
+        function setFilter(filterType) {
+            currentFilter = filterType;
+            const filters = ['all', 'open', 'done'];
+            filters.forEach(type => {
+                const btn = document.getElementById(`filter-${type}`);
+                if (!btn) return;
+                if (type === filterType) {
+                    btn.className = 'px-3 py-1.5 rounded-md text-xs font-bold transition bg-neon-red text-white shadow';
+                } else {
+                    btn.className = 'px-3 py-1.5 rounded-md text-xs font-bold transition text-neutral-400 hover:text-white';
+                }
+            });
+            renderChecklist();
+        }
+
+        // Modal Functions
+        function openResetModal() {
+            const modal = document.getElementById('reset-modal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeResetModal() {
+            const modal = document.getElementById('reset-modal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        function resetAllItems() {
+            checkedState = {};
+            saveState();
+            closeResetModal();
+            renderChecklist();
+        }
+
+        function checkAllItems() {
+            checklistData.forEach(sec => {
+                sec.groups.forEach(g => {
+                    g.items.forEach(item => {
+                        checkedState[item.id] = true;
+                    });
+                });
+            });
+            saveState();
+            closeResetModal();
+            renderChecklist();
+        }
+
+        // 20-Minute Briefing Timer
+        let timerSeconds = 20 * 60;
+        let timerInterval = null;
+        let isTimerRunning = false;
+
+        function updateTimerDisplay() {
+            const mins = Math.floor(timerSeconds / 60);
+            const secs = timerSeconds % 60;
+            const display = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+            const timerEl = document.getElementById('timer-display');
+            const timerBox = document.getElementById('timer-box');
+            timerEl.textContent = display;
+
+            if (timerSeconds <= 180 && timerSeconds > 0) {
+                timerEl.classList.add('text-neon-redBright');
+                timerBox.classList.add('border-neon-red');
+            } else if (timerSeconds === 0) {
+                timerEl.classList.add('text-neon-redBright');
+                timerBox.classList.add('timer-warning', 'border-neon-redBright');
+            } else {
+                timerEl.classList.remove('text-neon-redBright');
+                timerBox.classList.remove('timer-warning', 'border-neon-red', 'border-neon-redBright');
+            }
+        }
+
+        function toggleTimer() {
+            const playIcon = document.getElementById('timer-play-icon');
+            const pauseIcon = document.getElementById('timer-pause-icon');
+
+            if (isTimerRunning) {
+                clearInterval(timerInterval);
+                isTimerRunning = false;
+                playIcon.classList.remove('hidden');
+                pauseIcon.classList.add('hidden');
+            } else {
+                if (timerSeconds <= 0) timerSeconds = 20 * 60;
+                isTimerRunning = true;
+                playIcon.classList.add('hidden');
+                pauseIcon.classList.remove('hidden');
+                timerInterval = setInterval(() => {
+                    if (timerSeconds > 0) {
+                        timerSeconds--;
+                        updateTimerDisplay();
+                    } else {
+                        clearInterval(timerInterval);
+                        isTimerRunning = false;
+                        playIcon.classList.remove('hidden');
+                        pauseIcon.classList.add('hidden');
+                    }
+                }, 1000);
+            }
+        }
+
+        function resetTimer() {
+            clearInterval(timerInterval);
+            isTimerRunning = false;
+            timerSeconds = 20 * 60;
+            document.getElementById('timer-play-icon').classList.remove('hidden');
+            document.getElementById('timer-pause-icon').classList.add('hidden');
+            updateTimerDisplay();
+        }
+
+        // Fullscreen API Toggle
+        function toggleFullScreen() {
+            const docEl = document.documentElement;
+            if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+                if (docEl.requestFullscreen) {
+                    docEl.requestFullscreen().catch(() => {});
+                } else if (docEl.webkitRequestFullscreen) {
+                    docEl.webkitRequestFullscreen();
+                }
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen().catch(() => {});
+                } else if (document.webkitExitFullscreen) {
+                    document.webkitExitFullscreen();
+                }
+            }
+        }
+
+        document.addEventListener('fullscreenchange', updateFullscreenButton);
+        document.addEventListener('webkitfullscreenchange', updateFullscreenButton);
+
+        function updateFullscreenButton() {
+            const isFs = !!(document.fullscreenElement || document.webkitFullscreenElement);
+            document.getElementById('fs-enter-icon').classList.toggle('hidden', isFs);
+            document.getElementById('fs-exit-icon').classList.toggle('hidden', !isFs);
+            document.getElementById('fs-text').textContent = isFs ? 'Vollbild beenden' : 'Vollbildmodus';
+        }
+
+        // Initialize on page load
+        window.onload = function() {
+            loadState();
+            renderChecklist();
+            updateTimerDisplay();
+        };
+    </script>
+</body>
+</html>
